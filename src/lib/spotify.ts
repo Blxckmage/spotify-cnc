@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { spotifyFetch } from "./spotify-fetch";
 
 export interface SpotifyPlaylist {
   id: string;
@@ -15,6 +16,7 @@ export interface SpotifyPlaylist {
   external_urls: {
     spotify: string;
   };
+  snapshot_id: string;
 }
 
 export interface SpotifyPlaylistsResponse {
@@ -97,7 +99,7 @@ export class SpotifyAPI {
     limit = 50,
     offset = 0,
   ): Promise<SpotifyPlaylistsResponse> {
-    const response = await fetch(
+    const response = await spotifyFetch(
       `https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`,
       {
         headers: {
@@ -105,25 +107,15 @@ export class SpotifyAPI {
         },
       },
     );
-
-    if (!response.ok) {
-      throw new Error(`Spotify API error: ${response.statusText}`);
-    }
-
     return response.json();
   }
 
   async getCurrentUser() {
-    const response = await fetch("https://api.spotify.com/v1/me", {
+    const response = await spotifyFetch("https://api.spotify.com/v1/me", {
       headers: {
         Authorization: `Bearer ${this.accessToken}`,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Spotify API error: ${response.statusText}`);
-    }
-
     return response.json();
   }
 }
