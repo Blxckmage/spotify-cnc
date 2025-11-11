@@ -20,6 +20,7 @@ export interface Session {
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -37,10 +38,16 @@ export function useAuth() {
   }, []);
 
   const login = async () => {
-    await authClient.signIn.social({
-      provider: "spotify",
-      callbackURL: "/",
-    });
+    setLoggingIn(true);
+    try {
+      await authClient.signIn.social({
+        provider: "spotify",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      console.error("Login failed:", error);
+      setLoggingIn(false);
+    }
   };
 
   const logout = async () => {
@@ -51,6 +58,7 @@ export function useAuth() {
   return {
     session,
     loading,
+    loggingIn,
     isAuthenticated: !!session,
     login,
     logout,

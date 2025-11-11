@@ -1,5 +1,6 @@
 "use client";
 
+import { Dashboard } from "@/components/dashboard";
 import { LoginScreen } from "@/components/login-screen";
 import { Playlists } from "@/components/playlists";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const { session, loading, login, logout } = useAuth();
+  const { session, loading, loggingIn, login, logout } = useAuth();
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,12 +39,14 @@ export default function Home() {
     }
   };
 
-  if (loading) {
+  if (loading || loggingIn) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">
+            {loggingIn ? "Connecting to Spotify..." : "Loading..."}
+          </p>
         </div>
       </main>
     );
@@ -51,14 +54,14 @@ export default function Home() {
 
   if (!session) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-24">
-        <LoginScreen onLogin={login} />
+      <main className="flex min-h-screen flex-col items-center justify-center p-24 transition-opacity duration-300 animate-in fade-in">
+        <LoginScreen onLogin={login} loading={loggingIn} />
       </main>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24 gap-8">
+    <main className="flex min-h-screen flex-col items-center p-8 gap-8 transition-opacity duration-300 animate-in fade-in">
       <UserProfile session={session} onLogout={logout} />
 
       {loadingPlaylists ? (
@@ -80,7 +83,10 @@ export default function Home() {
           </Button>
         </div>
       ) : (
-        <Playlists playlists={playlists} />
+        <>
+          <Dashboard playlists={playlists} />
+          <Playlists playlists={playlists} />
+        </>
       )}
     </main>
   );
