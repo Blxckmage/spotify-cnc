@@ -48,8 +48,11 @@ export class SpotifyAPI {
       account.accessTokenExpiresAt &&
       new Date(account.accessTokenExpiresAt) < new Date()
     ) {
+      if (!account.refreshToken) {
+        return null;
+      }
       const newToken = await SpotifyAPI.refreshAccessToken(
-        account.refreshToken!,
+        account.refreshToken,
       );
       if (newToken) {
         await prisma.account.update({

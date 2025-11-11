@@ -1,3 +1,4 @@
+import { ExternalLink, Music } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -7,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { SpotifyPlaylist } from "@/lib/spotify";
-import { ExternalLink, Music } from "lucide-react";
 
 interface PlaylistsProps {
   playlists: SpotifyPlaylist[];
@@ -39,6 +39,7 @@ export function Playlists({ playlists }: PlaylistsProps) {
               <CardHeader className="p-0">
                 {playlist.images[0] ? (
                   <div className="relative aspect-square w-full overflow-hidden rounded-t-xl">
+                    {/* biome-ignore lint/performance/noImgElement: External Spotify URLs work fine with img */}
                     <img
                       src={playlist.images[0].url}
                       alt={playlist.name}

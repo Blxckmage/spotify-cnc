@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Dashboard } from "@/components/dashboard";
 import { LoginScreen } from "@/components/login-screen";
 import { Playlists } from "@/components/playlists";
@@ -7,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { UserProfile } from "@/components/user-profile";
 import { useAuth } from "@/hooks/use-auth";
 import type { SpotifyPlaylist } from "@/lib/spotify";
-import { AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
 
 export default function Home() {
   const { session, loading, loggingIn, login, logout } = useAuth();
@@ -16,13 +16,7 @@ export default function Home() {
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (session) {
-      fetchPlaylists();
-    }
-  }, [session]);
-
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = useCallback(async () => {
     setLoadingPlaylists(true);
     setError(null);
     try {
@@ -37,7 +31,13 @@ export default function Home() {
     } finally {
       setLoadingPlaylists(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (session) {
+      fetchPlaylists();
+    }
+  }, [session, fetchPlaylists]);
 
   if (loading || loggingIn) {
     return (

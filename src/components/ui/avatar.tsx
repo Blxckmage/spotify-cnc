@@ -48,7 +48,7 @@ Avatar.displayName = "Avatar";
 const AvatarImage = React.forwardRef<
   HTMLImageElement,
   React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, src, ...props }, ref) => {
+>(({ className, src, alt = "", ...props }, ref) => {
   const { imageLoadingStatus, setImageLoadingStatus } = useAvatarContext();
 
   React.useEffect(() => {
@@ -71,9 +71,11 @@ const AvatarImage = React.forwardRef<
   }, [src, setImageLoadingStatus]);
 
   return imageLoadingStatus === "loaded" ? (
+    // biome-ignore lint/performance/noImgElement: Avatar needs custom loading logic with img
     <img
       ref={ref}
       src={src}
+      alt={alt}
       className={cn("aspect-square h-full w-full", className)}
       {...props}
     />
