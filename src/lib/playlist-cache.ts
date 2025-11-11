@@ -1,8 +1,3 @@
-/**
- * Smart caching for Spotify playlists using snapshot IDs
- * Dramatically reduces API calls by only re-fetching changed playlists
- */
-
 const CACHE_VERSION = "v1";
 const CACHE_KEY_PREFIX = "spotify_playlist_cache";
 
@@ -12,9 +7,6 @@ export interface CachedPlaylist {
   cached_at: number;
 }
 
-/**
- * Check if a playlist needs to be re-fetched based on snapshot_id
- */
 export function needsRefresh(
   playlistId: string,
   currentSnapshotId: string,
@@ -23,16 +15,12 @@ export function needsRefresh(
     const cached = getCachedPlaylist(playlistId);
     if (!cached) return true;
 
-    // If snapshot_id matches, playlist hasn't changed
     return cached.snapshot_id !== currentSnapshotId;
   } catch {
     return true;
   }
 }
 
-/**
- * Get cached playlist data
- */
 export function getCachedPlaylist(playlistId: string): CachedPlaylist | null {
   try {
     if (typeof window === "undefined") return null;
@@ -48,9 +36,6 @@ export function getCachedPlaylist(playlistId: string): CachedPlaylist | null {
   }
 }
 
-/**
- * Cache playlist data with snapshot_id
- */
 export function cachePlaylist(
   playlistId: string,
   snapshotId: string,
@@ -68,14 +53,10 @@ export function cachePlaylist(
 
     localStorage.setItem(key, JSON.stringify(cached));
   } catch (error) {
-    // Silently fail if localStorage is full or unavailable
     console.warn("Failed to cache playlist:", error);
   }
 }
 
-/**
- * Clear all cached playlists (useful for logout or cache invalidation)
- */
 export function clearPlaylistCache(): void {
   try {
     if (typeof window === "undefined") return;
@@ -91,9 +72,6 @@ export function clearPlaylistCache(): void {
   }
 }
 
-/**
- * Clear old cache versions (useful for migrations)
- */
 export function clearOldCacheVersions(): void {
   try {
     if (typeof window === "undefined") return;
@@ -112,9 +90,6 @@ export function clearOldCacheVersions(): void {
   }
 }
 
-/**
- * Get cache statistics
- */
 export function getCacheStats(): {
   total: number;
   size_kb: number;

@@ -1,30 +1,6 @@
+import type { SpotifyPlaylistsResponse } from "@/types/spotify";
 import { prisma } from "./prisma";
 import { spotifyFetch } from "./spotify-fetch";
-
-export interface SpotifyPlaylist {
-  id: string;
-  name: string;
-  description: string | null;
-  images: { url: string }[];
-  tracks: {
-    total: number;
-  };
-  owner: {
-    display_name: string;
-  };
-  public: boolean;
-  external_urls: {
-    spotify: string;
-  };
-  snapshot_id: string;
-}
-
-export interface SpotifyPlaylistsResponse {
-  items: SpotifyPlaylist[];
-  total: number;
-  limit: number;
-  offset: number;
-}
 
 export class SpotifyAPI {
   private accessToken: string;
@@ -45,7 +21,6 @@ export class SpotifyAPI {
       return null;
     }
 
-    // Check if token is expired and refresh if needed
     if (
       account.accessTokenExpiresAt &&
       new Date(account.accessTokenExpiresAt) < new Date()

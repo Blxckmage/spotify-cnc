@@ -1,8 +1,3 @@
-/**
- * Custom fetch wrapper with retry logic and error handling for Spotify API
- * Based on patterns from spotify-dedup for production reliability
- */
-
 interface RetryOptions {
   maxRetries?: number;
   backoffMultiplier?: number;
@@ -28,9 +23,6 @@ export class SpotifyFetchError extends Error {
   }
 }
 
-/**
- * Enhanced fetch with automatic retry logic and rate limit handling
- */
 export async function spotifyFetch(
   url: string,
   options: RequestInit = {},
@@ -49,14 +41,11 @@ export async function spotifyFetch(
     try {
       const response = await fetch(url, options);
 
-      // Success - return response
       if (response.ok) {
         return response;
       }
 
-      // Handle different error types
       if (response.status === 429) {
-        // Rate limited - respect Retry-After header
         const retryAfter = response.headers.get("Retry-After");
         const delay = retryAfter
           ? Number.parseInt(retryAfter, 10) * 1000
@@ -71,13 +60,11 @@ export async function spotifyFetch(
           continue;
         }
       } else if (response.status === 401 && onTokenRefresh && attempt === 1) {
-        // Token expired - try to refresh once
         console.warn("Token expired (401). Attempting to refresh...");
 
         try {
           const newToken = await onTokenRefresh();
 
-          // Update authorization header and retry
           const headers = new Headers(options.headers);
           headers.set("Authorization", `Bearer ${newToken}`);
 
@@ -93,7 +80,6 @@ export async function spotifyFetch(
           );
         }
       } else if (response.status === 400) {
-        // Bad request - don't retry
         const errorData: SpotifyErrorResponse = await response
           .json()
           .catch(() => ({
@@ -106,7 +92,6 @@ export async function spotifyFetch(
           errorData,
         );
       } else if (response.status >= 500) {
-        // Server error - retry with backoff
         const delay = calculateBackoffDelay(
           baseDelay,
           backoffMultiplier,
@@ -123,7 +108,6 @@ export async function spotifyFetch(
         }
       }
 
-      // Other errors - throw immediately
       const errorData: SpotifyErrorResponse = await response
         .json()
         .catch(() => ({
@@ -138,12 +122,10 @@ export async function spotifyFetch(
     } catch (error) {
       lastError = error as Error;
 
-      // If it's a SpotifyFetchError, don't retry
       if (error instanceof SpotifyFetchError) {
         throw error;
       }
 
-      // Network errors - retry with backoff
       if (attempt < maxRetries) {
         const delay = calculateBackoffDelay(
           baseDelay,
@@ -158,13 +140,9 @@ export async function spotifyFetch(
     }
   }
 
-  // All retries exhausted
   throw lastError || new Error("Max retries exceeded");
 }
 
-/**
- * Calculate exponential backoff delay
- */
 function calculateBackoffDelay(
   baseDelay: number,
   backoffMultiplier: number,
@@ -173,9 +151,6 @@ function calculateBackoffDelay(
   return baseDelay * backoffMultiplier ** (attempt - 1);
 }
 
-/**
- * Sleep utility
- */
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

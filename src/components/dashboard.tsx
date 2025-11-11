@@ -1,6 +1,6 @@
 import { ListMusic, Music } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { SpotifyPlaylist } from "@/lib/spotify";
+import type { SpotifyPlaylist } from "@/types/spotify";
 
 interface DashboardProps {
   playlists: SpotifyPlaylist[];

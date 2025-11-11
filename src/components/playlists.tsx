@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { SpotifyPlaylist } from "@/lib/spotify";
+import type { SpotifyPlaylist } from "@/types/spotify";
 
 interface PlaylistsProps {
   playlists: SpotifyPlaylist[];

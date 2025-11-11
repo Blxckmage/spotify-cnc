@@ -7,7 +7,7 @@ import {
   getCachedPlaylist,
   needsRefresh,
 } from "@/lib/playlist-cache";
-import type { SpotifyPlaylist } from "@/lib/spotify";
+import type { SpotifyPlaylist } from "@/types/spotify";
 
 interface UseCachedPlaylistsResult {
   playlists: SpotifyPlaylist[];
@@ -18,10 +18,6 @@ interface UseCachedPlaylistsResult {
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook that fetches playlists with smart caching
- * Uses snapshot_id to avoid re-fetching unchanged playlists
- */
 export function useCachedPlaylists(enabled = true): UseCachedPlaylistsResult {
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,10 +32,8 @@ export function useCachedPlaylists(enabled = true): UseCachedPlaylistsResult {
     setCacheMisses(0);
 
     try {
-      // Clear old cache versions on mount
       clearOldCacheVersions();
 
-      // Fetch playlist list from API
       const response = await fetch("/api/playlists");
       if (!response.ok) {
         throw new Error("Failed to fetch playlists");
@@ -51,19 +45,15 @@ export function useCachedPlaylists(enabled = true): UseCachedPlaylistsResult {
       let hits = 0;
       let misses = 0;
 
-      // Check cache for each playlist
       const processedPlaylists = fetchedPlaylists.map((playlist) => {
         const cached = getCachedPlaylist(playlist.id);
 
-        // Check if we need to refresh based on snapshot_id
         if (cached && !needsRefresh(playlist.id, playlist.snapshot_id)) {
           hits++;
-          // Return cached version (could include more detailed data)
           return { ...playlist, ...(cached.data as object) };
         }
 
         misses++;
-        // Cache the new/updated playlist
         cachePlaylist(playlist.id, playlist.snapshot_id, playlist);
         return playlist;
       });
@@ -72,7 +62,6 @@ export function useCachedPlaylists(enabled = true): UseCachedPlaylistsResult {
       setCacheMisses(misses);
       setPlaylists(processedPlaylists);
 
-      // Log cache performance
       if (hits > 0) {
         console.log(
           `Cache performance: ${hits} hits, ${misses} misses (${Math.round((hits / (hits + misses)) * 100)}% hit rate)`,
