@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { Dashboard } from "@/components/dashboard";
 import { ErrorDisplay } from "@/components/error-display";
 import { LoadingSpinner } from "@/components/loading-spinner";
 import { LoginScreen } from "@/components/login-screen";
@@ -18,7 +16,6 @@ export default function Home() {
     error,
     refetch,
   } = useCachedPlaylists(!!session);
-  const [isComparing, setIsComparing] = useState(false);
 
   if (loading || loggingIn) {
     return (
@@ -46,16 +43,8 @@ export default function Home() {
         <LoadingSpinner message="Loading playlists..." />
       ) : error ? (
         <ErrorDisplay message={error} onRetry={refetch} />
-      ) : isComparing ? (
-        <PlaylistComparison
-          playlists={playlists}
-          onBack={() => setIsComparing(false)}
-        />
       ) : (
-        <Dashboard
-          playlists={playlists}
-          onCompareClick={() => setIsComparing(true)}
-        />
+        <PlaylistComparison playlists={playlists} />
       )}
     </main>
   );

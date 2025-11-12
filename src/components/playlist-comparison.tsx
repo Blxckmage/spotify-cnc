@@ -12,7 +12,7 @@ import type { SpotifyPlaylist } from "@/types/spotify";
 
 interface PlaylistComparisonProps {
   playlists: SpotifyPlaylist[];
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function PlaylistComparison({
@@ -28,10 +28,14 @@ export function PlaylistComparison({
   return (
     <div className="w-full max-w-7xl space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
+        {onBack ? (
+          <Button variant="ghost" onClick={onBack} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        ) : (
+          <div />
+        )}
         <h1 className="text-3xl font-bold">Compare Playlists</h1>
         <div className="w-[100px]" />
       </div>
