@@ -1,4 +1,7 @@
-import type { SpotifyPlaylistsResponse } from "@/types/spotify";
+import type {
+  SpotifyPlaylistsResponse,
+  SpotifyPlaylistTracksResponse,
+} from "@/types/spotify";
 import { prisma } from "./prisma";
 import { spotifyFetch } from "./spotify-fetch";
 
@@ -91,6 +94,22 @@ export class SpotifyAPI {
         Authorization: `Bearer ${this.accessToken}`,
       },
     });
+    return response.json();
+  }
+
+  async getPlaylistTracks(
+    playlistId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<SpotifyPlaylistTracksResponse> {
+    const response = await spotifyFetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      },
+    );
     return response.json();
   }
 }

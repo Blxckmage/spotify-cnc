@@ -29,3 +29,38 @@ export interface SpotifyUser {
   email: string;
   images: { url: string }[];
 }
+
+export interface SpotifyTrack {
+  id: string;
+  name: string;
+  uri: string;
+  duration_ms: number;
+  explicit: boolean;
+  external_urls: {
+    spotify: string;
+  };
+  artists: {
+    id: string;
+    name: string;
+    external_urls: {
+      spotify: string;
+    };
+  }[];
+  album: {
+    id: string;
+    name: string;
+    images: { url: string }[];
+  };
+}
+
+export interface SpotifyPlaylistTrack {
+  added_at: string;
+  track: SpotifyTrack;
+}
+
+export interface SpotifyPlaylistTracksResponse {
+  items: SpotifyPlaylistTrack[];
+  total: number;
+  limit: number;
+  offset: number;
+}
