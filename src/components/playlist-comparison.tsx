@@ -1,5 +1,5 @@
-import { ArrowLeft, GitCompare, Music } from "lucide-react";
-import { useState } from "react";
+import { Check, GitCompare, Music, Search, X } from "lucide-react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,180 +8,284 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import type { SpotifyPlaylist } from "@/types/spotify";
 
 interface PlaylistComparisonProps {
   playlists: SpotifyPlaylist[];
-  onBack?: () => void;
 }
 
-export function PlaylistComparison({
-  playlists,
-  onBack,
-}: PlaylistComparisonProps) {
+export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [selectedRight, setSelectedRight] = useState<string | null>(null);
+  const [searchLeft, setSearchLeft] = useState("");
+  const [searchRight, setSearchRight] = useState("");
 
   const canCompare =
     selectedLeft && selectedRight && selectedLeft !== selectedRight;
 
+  const selectedLeftPlaylist = useMemo(
+    () => playlists.find((p) => p.id === selectedLeft),
+    [playlists, selectedLeft],
+  );
+
+  const selectedRightPlaylist = useMemo(
+    () => playlists.find((p) => p.id === selectedRight),
+    [playlists, selectedRight],
+  );
+
+  const filteredLeftPlaylists = useMemo(
+    () =>
+      playlists.filter((p) =>
+        p.name.toLowerCase().includes(searchLeft.toLowerCase()),
+      ),
+    [playlists, searchLeft],
+  );
+
+  const filteredRightPlaylists = useMemo(
+    () =>
+      playlists.filter((p) =>
+        p.name.toLowerCase().includes(searchRight.toLowerCase()),
+      ),
+    [playlists, searchRight],
+  );
+
+  const handleLeftSelect = useCallback(
+    (id: string) => {
+      setSelectedLeft(selectedLeft === id ? null : id);
+    },
+    [selectedLeft],
+  );
+
+  const handleRightSelect = useCallback(
+    (id: string) => {
+      setSelectedRight(selectedRight === id ? null : id);
+    },
+    [selectedRight],
+  );
+
   return (
     <div className="w-full max-w-7xl space-y-6">
-      <div className="flex items-center justify-between">
-        {onBack ? (
-          <Button variant="ghost" onClick={onBack} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-        ) : (
-          <div />
-        )}
+      <div className="flex items-center justify-center">
         <h1 className="text-3xl font-bold">Compare Playlists</h1>
-        <div className="w-[100px]" />
       </div>
 
-      <Card className="border-2">
-        <CardHeader>
-          <CardTitle className="text-lg">Select Two Playlists</CardTitle>
-          <CardDescription>
-            Choose playlists from each side to find duplicate tracks
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-6 items-start">
-        <div className="space-y-4">
-          <div className="text-center lg:text-left">
-            <h2 className="text-xl font-semibold mb-2">First Playlist</h2>
-            <p className="text-sm text-muted-foreground">
-              {selectedLeft ? "Selected" : "Click to select"}
-            </p>
-          </div>
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-            {playlists.map((playlist) => (
-              <Card
-                key={playlist.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedLeft === playlist.id
-                    ? "border-2 border-green-500 bg-green-50 dark:bg-green-950"
-                    : selectedRight === playlist.id
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                }`}
-                onClick={() => {
-                  if (selectedRight !== playlist.id) {
-                    setSelectedLeft(
-                      selectedLeft === playlist.id ? null : playlist.id,
-                    );
-                  }
-                }}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    {playlist.images[0] ? (
-                      <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded">
-                        {/* biome-ignore lint/performance/noImgElement: External Spotify URLs work fine with img */}
-                        <img
-                          src={playlist.images[0].url}
-                          alt={playlist.name}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 flex-shrink-0 bg-muted rounded flex items-center justify-center">
-                        <Music className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">
-                        {playlist.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {playlist.tracks.total} tracks
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center lg:pt-24">
-          <div className="relative flex flex-col items-center gap-4">
-            <div className="hidden lg:block absolute top-0 bottom-0 left-1/2 w-px bg-border -translate-x-1/2" />
-            <div className="hidden lg:flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-4">
-              <div className="h-px w-12 bg-border" />
-              <div className="h-px w-12 bg-border" />
+      {canCompare && (
+        <Card className="border-2 border-green-500">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <GitCompare className="h-5 w-5 text-green-600" />
+                  Ready to Compare
+                </CardTitle>
+                <CardDescription>
+                  {selectedLeftPlaylist?.name} vs {selectedRightPlaylist?.name}
+                </CardDescription>
+              </div>
+              <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                <GitCompare className="h-4 w-4" />
+                Find Duplicates
+              </Button>
             </div>
-            <Button
-              size="lg"
-              disabled={!canCompare}
-              className="relative z-10 bg-green-600 hover:bg-green-700 disabled:opacity-50"
-            >
-              <GitCompare className="h-5 w-5" />
-              Compare
-            </Button>
-          </div>
-        </div>
+          </CardHeader>
+        </Card>
+      )}
 
-        <div className="space-y-4">
-          <div className="text-center lg:text-right">
-            <h2 className="text-xl font-semibold mb-2">Second Playlist</h2>
-            <p className="text-sm text-muted-foreground">
-              {selectedRight ? "Selected" : "Click to select"}
-            </p>
-          </div>
-          <div className="space-y-3 max-h-[600px] overflow-y-auto pl-2">
-            {playlists.map((playlist) => (
-              <Card
-                key={playlist.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedRight === playlist.id
-                    ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-950"
-                    : selectedLeft === playlist.id
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                }`}
-                onClick={() => {
-                  if (selectedLeft !== playlist.id) {
-                    setSelectedRight(
-                      selectedRight === playlist.id ? null : playlist.id,
-                    );
-                  }
-                }}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    {playlist.images[0] ? (
-                      <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded">
-                        {/* biome-ignore lint/performance/noImgElement: External Spotify URLs work fine with img */}
-                        <img
-                          src={playlist.images[0].url}
-                          alt={playlist.name}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 flex-shrink-0 bg-muted rounded flex items-center justify-center">
-                        <Music className="w-6 h-6 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">
-                        {playlist.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {playlist.tracks.total} tracks
-                      </p>
-                    </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">First Playlist</CardTitle>
+                  <CardDescription className="mt-1">
+                    {selectedLeftPlaylist
+                      ? `${selectedLeftPlaylist.tracks.total.toLocaleString()} tracks`
+                      : "Select a playlist"}
+                  </CardDescription>
+                </div>
+                {selectedLeft && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedLeft(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <Separator />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search playlists..."
+                  value={searchLeft}
+                  onChange={(e) => setSearchLeft(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px] pr-4">
+              <div className="space-y-2">
+                {filteredLeftPlaylists.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Music className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No playlists found</p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+                ) : (
+                  filteredLeftPlaylists.map((playlist) => (
+                    <PlaylistCard
+                      key={playlist.id}
+                      playlist={playlist}
+                      isSelected={selectedLeft === playlist.id}
+                      isDisabled={selectedRight === playlist.id}
+                      onSelect={() => handleLeftSelect(playlist.id)}
+                      color="green"
+                    />
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Second Playlist</CardTitle>
+                  <CardDescription className="mt-1">
+                    {selectedRightPlaylist
+                      ? `${selectedRightPlaylist.tracks.total.toLocaleString()} tracks`
+                      : "Select a playlist"}
+                  </CardDescription>
+                </div>
+                {selectedRight && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedRight(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <Separator />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search playlists..."
+                  value={searchRight}
+                  onChange={(e) => setSearchRight(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[500px] pr-4">
+              <div className="space-y-2">
+                {filteredRightPlaylists.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Music className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No playlists found</p>
+                  </div>
+                ) : (
+                  filteredRightPlaylists.map((playlist) => (
+                    <PlaylistCard
+                      key={playlist.id}
+                      playlist={playlist}
+                      isSelected={selectedRight === playlist.id}
+                      isDisabled={selectedLeft === playlist.id}
+                      onSelect={() => handleRightSelect(playlist.id)}
+                      color="blue"
+                    />
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
+
+interface PlaylistCardProps {
+  playlist: SpotifyPlaylist;
+  isSelected: boolean;
+  isDisabled: boolean;
+  onSelect: () => void;
+  color: "green" | "blue";
+}
+
+const PlaylistCard = memo(
+  ({
+    playlist,
+    isSelected,
+    isDisabled,
+    onSelect,
+    color,
+  }: PlaylistCardProps) => {
+    const colorClasses = {
+      green: {
+        border: "border-green-500",
+        bg: "bg-green-50",
+        ring: "ring-green-500",
+      },
+      blue: {
+        border: "border-blue-500",
+        bg: "bg-blue-50",
+        ring: "ring-blue-500",
+      },
+    };
+
+    const colors = colorClasses[color];
+
+    return (
+      <button
+        type="button"
+        onClick={onSelect}
+        disabled={isDisabled}
+        className={`w-full text-left p-3 rounded-lg border-2 transition-all relative ${
+          isSelected
+            ? `${colors.border} ${colors.bg} ring-2 ${colors.ring} ring-offset-2`
+            : "border-border hover:border-muted-foreground"
+        } ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      >
+        {isSelected && (
+          <div className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm">
+            <Check className="h-4 w-4 text-green-600" />
+          </div>
+        )}
+        <div className="flex items-start gap-3">
+          {playlist.images[0]?.url ? (
+            <img
+              src={playlist.images[0].url}
+              alt={playlist.name}
+              className="w-12 h-12 rounded object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded bg-muted flex items-center justify-center flex-shrink-0">
+              <Music className="w-6 h-6 text-muted-foreground" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm truncate">{playlist.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {playlist.tracks.total.toLocaleString()} tracks
+            </p>
+          </div>
+        </div>
+      </button>
+    );
+  },
+);
+
+PlaylistCard.displayName = "PlaylistCard";
