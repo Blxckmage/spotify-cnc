@@ -1,4 +1,4 @@
-import { ListMusic, Loader2, Music, TrendingUp } from "lucide-react";
+import { Copy, GitCompare, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -9,12 +9,18 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onLogin, loading = false }: LoginScreenProps) {
   return (
-    <div className="flex flex-col items-center gap-12 max-w-4xl w-full px-4">
-      <div className="text-center space-y-4">
-        <h1 className="text-6xl font-bold">Spotify C&C</h1>
-        <p className="text-2xl text-muted-foreground">Compare and Conquer</p>
-        <p className="text-lg text-muted-foreground max-w-2xl">
-          Manage and analyze your Spotify playlists with powerful insights
+    <div className="flex flex-col items-center gap-12 max-w-5xl w-full px-4">
+      <div className="text-center space-y-6">
+        <div className="flex items-center justify-center gap-3">
+          <GitCompare className="h-16 w-16 text-green-600" />
+          <h1 className="text-6xl font-bold">Spotify C&C</h1>
+        </div>
+        <p className="text-3xl font-semibold text-green-600">
+          Compare and Conquer Your Playlists
+        </p>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Find and remove duplicate tracks across your Spotify playlists with
+          ease
         </p>
       </div>
 
@@ -35,35 +41,47 @@ export function LoginScreen({ onLogin, loading = false }: LoginScreenProps) {
       </Button>
 
       <div className="grid gap-6 md:grid-cols-3 w-full mt-8">
-        <Card>
-          <CardContent className="pt-6 text-center space-y-2">
-            <ListMusic className="h-10 w-10 mx-auto text-primary" />
-            <h3 className="font-semibold text-lg">Track Playlists</h3>
+        <Card className="border-2">
+          <CardContent className="pt-6 text-center space-y-3">
+            <div className="h-12 w-12 mx-auto bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <GitCompare className="h-6 w-6 text-green-600" />
+            </div>
+            <h3 className="font-semibold text-lg">Compare Playlists</h3>
             <p className="text-sm text-muted-foreground">
-              View all your playlists in one place
+              Select any two playlists and instantly find duplicate tracks
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6 text-center space-y-2">
-            <Music className="h-10 w-10 mx-auto text-primary" />
-            <h3 className="font-semibold text-lg">Analyze Stats</h3>
+        <Card className="border-2">
+          <CardContent className="pt-6 text-center space-y-3">
+            <div className="h-12 w-12 mx-auto bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <Copy className="h-6 w-6 text-blue-600" />
+            </div>
+            <h3 className="font-semibold text-lg">Identify Duplicates</h3>
             <p className="text-sm text-muted-foreground">
-              Get insights on tracks and collections
+              See all duplicate tracks with details like artist and album
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6 text-center space-y-2">
-            <TrendingUp className="h-10 w-10 mx-auto text-primary" />
-            <h3 className="font-semibold text-lg">Compare & Conquer</h3>
+        <Card className="border-2">
+          <CardContent className="pt-6 text-center space-y-3">
+            <div className="h-12 w-12 mx-auto bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+              <Trash2 className="h-6 w-6 text-red-600" />
+            </div>
+            <h3 className="font-semibold text-lg">Clean Up</h3>
             <p className="text-sm text-muted-foreground">
-              Compare playlists and discover patterns
+              Choose which playlist to remove duplicates from with one click
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mt-8 text-center space-y-2">
+        <p className="text-sm text-muted-foreground">
+          Keep your playlists organized and duplicate-free
+        </p>
       </div>
     </div>
   );
