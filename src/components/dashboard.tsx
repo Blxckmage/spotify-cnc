@@ -1,4 +1,4 @@
-import { GitCompare, ListMusic, Music } from "lucide-react";
+import { GitCompare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,10 +22,10 @@ export function Dashboard({ playlists, onCompareClick }: DashboardProps) {
   );
 
   return (
-    <div className="w-full max-w-6xl space-y-8">
-      <Card className="border-2 border-green-200 dark:border-green-900 bg-gradient-to-br from-green-50 to-white dark:from-green-950 dark:to-background">
+    <div className="w-full max-w-7xl space-y-8">
+      <Card className="border-2 border-green-200 dark:border-green-900">
         <CardHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex items-center justify-between">
             <div className="space-y-2">
               <CardTitle className="text-2xl flex items-center gap-2">
                 <GitCompare className="h-6 w-6 text-green-600" />
@@ -45,37 +45,14 @@ export function Dashboard({ playlists, onCompareClick }: DashboardProps) {
             </Button>
           </div>
         </CardHeader>
+        <CardContent>
+          <div className="flex gap-8 text-sm text-muted-foreground">
+            <span>{totalPlaylists} playlists available</span>
+            <span>•</span>
+            <span>{totalTracks} total tracks</span>
+          </div>
+        </CardContent>
       </Card>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Your Playlists
-            </CardTitle>
-            <ListMusic className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalPlaylists}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Available for comparison
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tracks</CardTitle>
-            <Music className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalTracks}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Across all playlists
-            </p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
