@@ -69,8 +69,16 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
 
   return (
     <div className="w-full max-w-7xl space-y-6">
-      <div className="flex items-center justify-center">
-        <h1 className="text-3xl font-bold">Compare Playlists</h1>
+      <div className="flex items-center justify-center gap-4">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-green-500/20 rounded-lg blur-md group-hover:bg-green-500/30 transition duration-300" />
+          <div className="relative bg-green-600 dark:bg-green-500 p-2.5 rounded-lg border border-green-500/20 shadow-sm hover:shadow-md hover:border-green-400/40 transition-all duration-300">
+            <GitCompare className="h-6 w-6 text-white" strokeWidth={1.5} />
+          </div>
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          Compare Playlists
+        </h1>
       </div>
 
       {canCompare && (
