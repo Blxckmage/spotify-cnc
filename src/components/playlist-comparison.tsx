@@ -1,4 +1,5 @@
 import { Check, GitCompare, Music, Search, X } from "lucide-react";
+import Image from "next/image";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -266,9 +267,11 @@ const PlaylistCard = memo(
         )}
         <div className="flex items-start gap-3">
           {playlist.images[0]?.url ? (
-            <img
+            <Image
               src={playlist.images[0].url}
               alt={playlist.name}
+              width={48}
+              height={48}
               className="w-12 h-12 rounded object-cover flex-shrink-0"
             />
           ) : (
