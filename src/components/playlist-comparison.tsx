@@ -81,30 +81,8 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
         </h1>
       </div>
 
-      {canCompare && (
-        <Card className="border-2 border-green-500">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <GitCompare className="h-5 w-5 text-green-600" />
-                  Ready to Compare
-                </CardTitle>
-                <CardDescription>
-                  {selectedLeftPlaylist?.name} vs {selectedRightPlaylist?.name}
-                </CardDescription>
-              </div>
-              <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                <GitCompare className="h-4 w-4" />
-                Find Duplicates
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 gap-6 items-start lg:grid-cols-[1fr_auto_1fr]">
+        <Card className="order-1">
           <CardHeader>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -163,7 +141,147 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <div className="flex lg:hidden flex-col items-center justify-center gap-4 py-6 order-2">
+          <div
+            className={`relative flex flex-col items-center gap-3 py-4 px-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${
+              canCompare
+                ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-500/30"
+                : "bg-muted/30 border-muted"
+            }`}
+          >
+            {canCompare && (
+              <div className="absolute -inset-1 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl opacity-20 blur-xl" />
+            )}
+            <div className="relative flex items-center gap-2">
+              {canCompare ? (
+                <>
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider">
+                    Ready
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Select Playlists
+                </span>
+              )}
+            </div>
+            <Button
+              size="lg"
+              disabled={!canCompare}
+              className="relative bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
+            >
+              <GitCompare className="h-4 w-4" />
+              Find Duplicates
+            </Button>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground max-w-[200px] line-clamp-1">
+                {selectedLeftPlaylist?.name || "—"}
+              </p>
+              <p
+                className={`text-xs font-medium transition-colors duration-200 ${
+                  canCompare
+                    ? "text-green-600 dark:text-green-500"
+                    : "text-muted-foreground"
+                }`}
+              >
+                vs
+              </p>
+              <p className="text-xs text-muted-foreground max-w-[200px] line-clamp-1">
+                {selectedRightPlaylist?.name || "—"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden lg:flex flex-col items-center justify-center gap-6 pt-32 order-2">
+          <div className="relative flex flex-col items-center">
+            <div
+              className={`h-px w-24 transition-opacity duration-300 ${
+                selectedLeft
+                  ? "bg-gradient-to-r from-green-500 to-transparent opacity-100"
+                  : "bg-gradient-to-r from-muted to-transparent opacity-30"
+              }`}
+            />
+            <div
+              className={`absolute -left-24 top-0 h-px w-24 transition-opacity duration-300 ${
+                selectedLeft
+                  ? "bg-gradient-to-l from-green-500 to-transparent opacity-100"
+                  : "bg-gradient-to-l from-muted to-transparent opacity-30"
+              }`}
+            />
+          </div>
+
+          <div
+            className={`relative flex flex-col items-center gap-3 py-4 px-6 rounded-xl border-2 shadow-lg transition-all duration-300 ${
+              canCompare
+                ? "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-500/30"
+                : "bg-muted/30 border-muted"
+            }`}
+          >
+            {canCompare && (
+              <div className="absolute -inset-1 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl opacity-20 blur-xl" />
+            )}
+            <div className="relative flex items-center gap-2">
+              {canCompare ? (
+                <>
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wider">
+                    Ready
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Select Playlists
+                </span>
+              )}
+            </div>
+            <Button
+              size="lg"
+              disabled={!canCompare}
+              className="relative bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
+            >
+              <GitCompare className="h-4 w-4" />
+              Find Duplicates
+            </Button>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground max-w-[200px] line-clamp-1">
+                {selectedLeftPlaylist?.name || "—"}
+              </p>
+              <p
+                className={`text-xs font-medium transition-colors duration-200 ${
+                  canCompare
+                    ? "text-green-600 dark:text-green-500"
+                    : "text-muted-foreground"
+                }`}
+              >
+                vs
+              </p>
+              <p className="text-xs text-muted-foreground max-w-[200px] line-clamp-1">
+                {selectedRightPlaylist?.name || "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="relative flex flex-col items-center">
+            <div
+              className={`h-px w-24 transition-opacity duration-300 ${
+                selectedRight
+                  ? "bg-gradient-to-l from-blue-500 to-transparent opacity-100"
+                  : "bg-gradient-to-l from-muted to-transparent opacity-30"
+              }`}
+            />
+            <div
+              className={`absolute -right-24 top-0 h-px w-24 transition-opacity duration-300 ${
+                selectedRight
+                  ? "bg-gradient-to-r from-blue-500 to-transparent opacity-100"
+                  : "bg-gradient-to-r from-muted to-transparent opacity-30"
+              }`}
+            />
+          </div>
+        </div>
+
+        <Card className="order-3">
           <CardHeader>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
