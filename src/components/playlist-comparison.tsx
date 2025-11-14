@@ -1,6 +1,16 @@
 import { Check, GitCompare, Music, Search, X } from "lucide-react";
 import Image from "next/image";
 import { memo, useCallback, useMemo, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +33,7 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
   const [selectedRight, setSelectedRight] = useState<string | null>(null);
   const [searchLeft, setSearchLeft] = useState("");
   const [searchRight, setSearchRight] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const canCompare =
     selectedLeft && selectedRight && selectedLeft !== selectedRight;
@@ -66,6 +77,16 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
     },
     [selectedRight],
   );
+
+  const handleFindDuplicates = useCallback(() => {
+    setIsDialogOpen(true);
+  }, []);
+
+  const handleConfirmComparison = useCallback(() => {
+    setIsDialogOpen(false);
+    // TODO: Implement duplicate finding logic
+    console.log("Finding duplicates between:", selectedLeft, selectedRight);
+  }, [selectedLeft, selectedRight]);
 
   return (
     <div className="w-full max-w-7xl space-y-6">
@@ -169,6 +190,7 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
             <Button
               size="lg"
               disabled={!canCompare}
+              onClick={handleFindDuplicates}
               className="relative bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
             >
               <GitCompare className="h-4 w-4" />
@@ -239,6 +261,7 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
             <Button
               size="lg"
               disabled={!canCompare}
+              onClick={handleFindDuplicates}
               className="relative bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
             >
               <GitCompare className="h-4 w-4" />
@@ -340,6 +363,52 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Find Duplicate Tracks</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will compare tracks between:
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="font-medium text-foreground">
+                    {selectedLeftPlaylist?.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({selectedLeftPlaylist?.tracks.total.toLocaleString()}{" "}
+                    tracks)
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  <span className="font-medium text-foreground">
+                    {selectedRightPlaylist?.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({selectedRightPlaylist?.tracks.total.toLocaleString()}{" "}
+                    tracks)
+                  </span>
+                </div>
+              </div>
+              <p className="mt-4">
+                Tracks will be matched by name and artist. Any duplicates found
+                can be reviewed and removed from either playlist.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmComparison}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Find Duplicates
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
