@@ -1,6 +1,8 @@
 import { Check, GitCompare, Music, Search, X } from "lucide-react";
 import Image from "next/image";
 import { memo, useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { DuplicateResults } from "@/components/duplicate-results";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +26,52 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { SpotifyPlaylist } from "@/types/spotify";
 
+type VariationType =
+  | "live"
+  | "remix"
+  | "remaster"
+  | "acoustic"
+  | "instrumental"
+  | "radio_edit"
+  | "extended"
+  | "demo"
+  | "other"
+  | null;
+
+interface DuplicateTrack {
+  track: {
+    id: string;
+    name: string;
+    uri: string;
+    duration_ms: number;
+    explicit: boolean;
+    external_urls: { spotify: string };
+    artists: Array<{
+      id: string;
+      name: string;
+      external_urls: { spotify: string };
+    }>;
+    album: {
+      id: string;
+      name: string;
+      images: Array<{ url: string }>;
+    };
+  };
+  inLeft: boolean;
+  inRight: boolean;
+  matchType: "exact" | "similar";
+  variationType: VariationType;
+}
+
+interface CompareResponse {
+  duplicates: DuplicateTrack[];
+  stats: {
+    leftTotal: number;
+    rightTotal: number;
+    duplicatesFound: number;
+  };
+}
+
 interface PlaylistComparisonProps {
   playlists: SpotifyPlaylist[];
 }
@@ -34,6 +82,10 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
   const [searchLeft, setSearchLeft] = useState("");
   const [searchRight, setSearchRight] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
+  const [compareResults, setCompareResults] = useState<CompareResponse | null>(
+    null,
+  );
 
   const canCompare =
     selectedLeft && selectedRight && selectedLeft !== selectedRight;
@@ -82,11 +134,97 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
     setIsDialogOpen(true);
   }, []);
 
-  const handleConfirmComparison = useCallback(() => {
+  const handleConfirmComparison = useCallback(async () => {
+    if (!selectedLeft || !selectedRight) return;
+
     setIsDialogOpen(false);
-    // TODO: Implement duplicate finding logic
-    console.log("Finding duplicates between:", selectedLeft, selectedRight);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/playlists/compare?leftId=${selectedLeft}&rightId=${selectedRight}`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to compare playlists");
+      }
+
+      const data: CompareResponse = await response.json();
+      setCompareResults(data);
+    } catch (error) {
+      console.error("Error finding duplicates:", error);
+      toast.error("Failed to compare playlists. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [selectedLeft, selectedRight]);
+
+  const handleCloseResults = useCallback(() => {
+    setCompareResults(null);
+  }, []);
+
+  const handleDelete = useCallback(
+    async (trackUris: string[], deleteFrom: "left" | "right" | "both") => {
+      if (!selectedLeft || !selectedRight) return;
+
+      setIsLoading(true);
+
+      try {
+        const response = await fetch("/api/playlists/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            leftPlaylistId: selectedLeft,
+            rightPlaylistId: selectedRight,
+            trackUris,
+            deleteFrom,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to delete tracks");
+        }
+
+        const data = await response.json();
+
+        toast.success(
+          `Successfully removed ${data.deletedCount} track${data.deletedCount === 1 ? "" : "s"}`,
+        );
+
+        const compareResponse = await fetch(
+          `/api/playlists/compare?leftId=${selectedLeft}&rightId=${selectedRight}`,
+        );
+
+        if (compareResponse.ok) {
+          const compareData: CompareResponse = await compareResponse.json();
+          setCompareResults(compareData);
+        } else {
+          setCompareResults(null);
+        }
+      } catch (error) {
+        console.error("Error deleting tracks:", error);
+        toast.error("Failed to delete tracks. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedLeft, selectedRight],
+  );
+
+  if (compareResults) {
+    return (
+      <DuplicateResults
+        duplicates={compareResults.duplicates}
+        stats={compareResults.stats}
+        leftPlaylistName={selectedLeftPlaylist?.name || ""}
+        rightPlaylistName={selectedRightPlaylist?.name || ""}
+        onClose={handleCloseResults}
+        onDelete={handleDelete}
+      />
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl space-y-6">
@@ -369,34 +507,31 @@ export function PlaylistComparison({ playlists }: PlaylistComparisonProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Find Duplicate Tracks</AlertDialogTitle>
             <AlertDialogDescription>
-              This will compare tracks between:
-              <div className="mt-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span className="font-medium text-foreground">
-                    {selectedLeftPlaylist?.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({selectedLeftPlaylist?.tracks.total.toLocaleString()}{" "}
-                    tracks)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  <span className="font-medium text-foreground">
-                    {selectedRightPlaylist?.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({selectedRightPlaylist?.tracks.total.toLocaleString()}{" "}
-                    tracks)
-                  </span>
-                </div>
-              </div>
-              <p className="mt-4">
-                Tracks will be matched by name and artist. Any duplicates found
-                can be reviewed and removed from either playlist.
-              </p>
+              This will compare tracks between the selected playlists. Tracks
+              will be matched by name and artist. Any duplicates found can be
+              reviewed and removed from either playlist.
             </AlertDialogDescription>
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="font-medium text-foreground">
+                  {selectedLeftPlaylist?.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  ({selectedLeftPlaylist?.tracks.total.toLocaleString()} tracks)
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="font-medium text-foreground">
+                  {selectedRightPlaylist?.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  ({selectedRightPlaylist?.tracks.total.toLocaleString()}{" "}
+                  tracks)
+                </span>
+              </div>
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
