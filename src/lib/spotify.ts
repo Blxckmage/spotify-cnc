@@ -112,4 +112,24 @@ export class SpotifyAPI {
     );
     return response.json();
   }
+
+  async removeTracksFromPlaylist(
+    playlistId: string,
+    trackUris: string[],
+  ): Promise<{ snapshot_id: string }> {
+    const response = await spotifyFetch(
+      `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tracks: trackUris.map((uri) => ({ uri })),
+        }),
+      },
+    );
+    return response.json();
+  }
 }
